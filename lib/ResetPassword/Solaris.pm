@@ -10,32 +10,41 @@ use ResetPassword;
 
 sub reset_password {
 
-    my ($username) = shift;
+    my ($expect, $username) = shift;
 
     my $passhistory = '/etc/security/passhistory';
     my $tmpfile = '/tmp/bot.passhistory';
+    my $rmcmd = RemoteCommand->new({ expect => $expect });
 
-    my $remove_user_from_passhistory = RemoteCommand->new({ expect => RemCmd->expect });
+    $rmcmd->run({ command => 'uname -r' });
+    if ($rmcmd->rt->first_line eq '5.10') {
+    }
+    else {
+    }
 
-    $remove_user_from_passhistory->run({
-            execute => 'egrep /^$username/ $passhistory',
-            error_message => 'grep failed on passhistory: ',
-            failure => 'throw'
-        })->run({
-            execute => "sed '/^$username:/d' $passhistory > $tmpfile",
-            error_message => 'sed failed on passhistory: ',
-            failure => 'throw'
-        })->run({
-            execute => "mv $tmpfile $passhistory",
-            error_message => 'failed to update passhistory: ',
-            failure => 'throw'
-        })->run({
-            execute => "rm $tmpfile",
-            error_message => 'clean up failed passhistory',
-            failure => 'ignore'
-        });
+#    my $remove_user_from_passhistory = RemoteCommand->new({ expect => RemCmd->expect });
 
-    return $remove_user_from_passhistory->rt;
+#    $remove_user_from_passhistory->run({
+#            execute => 'egrep /^$username/ $passhistory',
+#            error_message => 'grep failed on passhistory: ',
+#            failure => 'throw'
+#        })->run({
+#            execute => "sed '/^$username:/d' $passhistory > $tmpfile",
+#            error_message => 'sed failed on passhistory: ',
+#            failure => 'throw'
+#        })->run({
+#            execute => "mv $tmpfile $passhistory",
+#            error_message => 'failed to update passhistory: ',
+#            failure => 'throw'
+#        })->run({
+#            execute => "rm $tmpfile",
+#            error_message => 'clean up failed passhistory',
+#            failure => 'ignore'
+#        });
+#
+#    return $remove_user_from_passhistory->rt;
+
+     return $rmcmd->rt;
 }
 
 1;
