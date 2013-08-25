@@ -1,6 +1,19 @@
 
 package ResetPassword;
 
+use strict;
+use warnings;
+use Exporter 'import';
+our @EXPORT_OK = qw( reset_password );
+
+use Expect;
+
+BEGIN {
+    *exp_continue = *Expect::exp_continue;
+    *exp_continue_timeout = *Expect::exp_continue_timeout;
+}
+
+
 sub reset_password {
     my ($expect, $username, $password) = @_;
     my $number_of_passwords_given = 0;
