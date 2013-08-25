@@ -1,1 +1,10 @@
 *.swp
+*~
+tags
+Makefile
+MANIFEST
+MANIFEST.bak
+Changes
+MYMETA*
+blib
+pm_to_blib
