@@ -4,7 +4,7 @@ package ResetPassword::Solaris;
 use strict;
 use warnings;
 
-sub remove_user_from_passhistory {
+sub reset_password {
 
     my ($username) = shift;
 
@@ -22,7 +22,7 @@ sub remove_user_from_passhistory {
             error_message => 'sed failed on passhistory: ',
             failure => 'throw'
         })->run({
-            execute => "mv $tmpfile $passhistory";
+            execute => "mv $tmpfile $passhistory",
             error_message => 'failed to update passhistory: ',
             failure => 'throw'
         })->run({
