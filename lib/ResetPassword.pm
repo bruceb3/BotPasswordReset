@@ -1,6 +1,14 @@
 
 package ResetPassword;
 
+our $VERSION = '1.0';
+
+=head1 NAME
+
+ResetPassword - Reset passwords on remote systems.
+
+=cut
+
 use strict;
 use warnings;
 use Exporter 'import';
