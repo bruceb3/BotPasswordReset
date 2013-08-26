@@ -24,25 +24,23 @@ BEGIN {
 
 sub reset_password {
     my ($expect, $username, $password) = @_;
-    my $number_of_passwords_given = 0;
 
     $expect->send("passwd $username");
-    $expect->expect( 
+    my $status;
+    $status = $expect->expect( 
         [ qr/[nN]ew [pP]assword:/m, sub {
-                my ($pty) = @_;
-                $number_of_passwords_given++;
-                $pty->send($password);
-                return exp_continue;
-            }, $expect ],
+                shift;
+                $expect->send($password);
+                exp_continue;
+            }],
 
         [ qr/Re-enter New password:/m, sub {
-                my ($pty) = @_;
-                $number_of_passwords_given++;
-                $pty->send($password);
-                return;
-            }, $expect ]
+                shift;
+                $expect->send($password);
+                exp_continue;
+            }],
+        [ $expect->shell_prompt(), sub { undef } ],
     );
-    my $status = $expect->wait_for_shell_prompt;
     return $status;
 }
 

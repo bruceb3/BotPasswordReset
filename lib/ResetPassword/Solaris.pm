@@ -7,44 +7,50 @@ use Exporter 'import';
 our @EXPORT_OK = qw( reset_password );
 
 use ResetPassword;
+use RemoteCommand;
 
 sub reset_password {
 
-    my ($expect, $username) = shift;
+    my ($expect, $username, $password) = @_;
 
-    my $passhistory = '/etc/security/passhistory';
-    my $tmpfile = '/tmp/bot.passhistory';
+    die "Solaris::reset_password no username\n" unless defined $username; 
+    die "Solaris::reset_password no password\n" unless defined $password; 
+
     my $rmcmd = RemoteCommand->new({ expect => $expect });
+    my $rt;
 
-    $rmcmd->run({ command => 'uname -r' });
-    if ($rmcmd->rt->first_line eq '5.10') {
-    }
-    else {
-    }
+    try {
+        $rmcmd->run({
+            execute => 'uname -r',
+            error_message => 'uname failed'
+        });
 
-#    my $remove_user_from_passhistory = RemoteCommand->new({ expect => RemCmd->expect });
+        if ($rmcmd->rt->first_line eq '5.10') {
+            my $passhistory = '/etc/security/passhistory';
+            my $tmpfile = '/tmp/bot.passhistory';
+            $rmcmd->run({
+                execute => "egrep \"^$username\" $passhistory",
+                error_message => 'grep failed on passhistory: ',
+                failure => 'ignore'
+            });
+            if ($rmcmd->rt->ok and defined $rmcmd->rt->first_line) {
+                $rmcmd->run({
+                    execute => "sed '/^$username:/d' $passhistory > $tmpfile",
+                    error_message => 'sed failed on passhistory: ',
+                })->run({
+                    execute => "mv $tmpfile $passhistory",
+                    error_message => 'failed to update passhistory: ',
+                })->run({
+                    execute => "rm $tmpfile",
+                    error_message => 'clean up failed passhistory',
+                    failure => 'ignore'
+                });
+            }
+        }
+        $rt = ResetPassword::reset_password($expect, $username, $password);
+    };
 
-#    $remove_user_from_passhistory->run({
-#            execute => 'egrep /^$username/ $passhistory',
-#            error_message => 'grep failed on passhistory: ',
-#            failure => 'throw'
-#        })->run({
-#            execute => "sed '/^$username:/d' $passhistory > $tmpfile",
-#            error_message => 'sed failed on passhistory: ',
-#            failure => 'throw'
-#        })->run({
-#            execute => "mv $tmpfile $passhistory",
-#            error_message => 'failed to update passhistory: ',
-#            failure => 'throw'
-#        })->run({
-#            execute => "rm $tmpfile",
-#            error_message => 'clean up failed passhistory',
-#            failure => 'ignore'
-#        });
-#
-#    return $remove_user_from_passhistory->rt;
-
-     return $rmcmd->rt;
+    return defined $rt ? $rt : $rmcmd->rt;
 }
 
 1;
