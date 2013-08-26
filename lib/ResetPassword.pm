@@ -28,7 +28,7 @@ sub reset_password {
     $expect->send("passwd $username");
     my $status;
     $status = $expect->expect( 
-        [ qr/[nN]ew [pP]assword|New UNIX Password:/m, sub {
+        [ qr/[nN]ew (UNIX)? [pP]assword/m, sub {
                 shift;
                 $expect->send($password);
                 exp_continue;
