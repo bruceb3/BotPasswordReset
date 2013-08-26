@@ -20,7 +20,7 @@ sub reset_password {
 
     $rt = ResetPassword::reset_password($expect, $username, $password);
     if ($rt->worked) {
-        $rt = $expect->execute({ command => 'pwdadm -c $username' });
+        $rt = $expect->execute({ command => "pwdadm -c $username" });
     }
 
     return $rt;
