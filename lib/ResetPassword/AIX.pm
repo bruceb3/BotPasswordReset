@@ -22,6 +22,9 @@ sub reset_password {
     if ($rt->worked) {
         $rt = $expect->execute({ command => "pwdadm -c $username" });
     }
+    if ($rt->worked) {
+        $rt = $expect->execute({ command => "chuser unsuccessful_login_count=0 $username" });
+    }
 
     return $rt;
 }
