@@ -39,6 +39,12 @@ sub reset_password {
                 $expect->send($password);
                 exp_continue;
             }],
+
+        [ qr/kerberos/mi, sub {
+                $expect->send(""); # just hit return.
+                exp_continue;
+            } ],
+        
         [ $expect->shell_prompt(), sub { undef } ],
     );
     return $status;
