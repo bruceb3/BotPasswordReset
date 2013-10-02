@@ -9,6 +9,8 @@ our @EXPORT_OK = qw( reset_password );
 use ResetPassword;
 use RemoteCommand;
 
+use Try::Tiny;
+
 sub reset_password {
 
     my ($expect, $username, $password) = @_;
@@ -24,8 +26,15 @@ sub reset_password {
             execute => 'uname -r',
             error_message => 'uname failed'
         });
+        my $os_version = $rmcmd->rt->first_line;
 
-        if ($rmcmd->rt->first_line eq '5.10') {
+        $rmcmd->run({
+            execute => 'ls -l /etc/security/passhistory',
+            error_message => 'ls failed',
+            failure => 'ignore',
+        });
+
+        if ($os_version eq '5.10' && $rmcmd->rt->worked) {
             my $passhistory = '/etc/security/passhistory';
             my $tmpfile = '/tmp/bot.passhistory';
             $rmcmd->run({
